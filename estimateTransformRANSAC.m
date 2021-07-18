@@ -22,13 +22,21 @@ function A_ransac = estimateTransformRANSAC(img1_points,img2_points)
         A = estimateTransform(im1pts,im2pts);
         %% Geometric Error Calculation
         %% Forward Transformation Error
-        im1ptsForward = transformForward(img1_points,A);
+
+        im1ptsForward  = [(A(1,1:2)*img1_points'+A(1,3))./(A(3,1:2)*img1_points'+A(3,3));...
+        (A(2,1:2)*img1_points'+A(2,3))./(A(3,1:2)*img1_points'+A(3,3))]';
+    
+    
         errorForward = sum((im1ptsForward-img2_points).^2,2).^0.5;
         totalForwardError = sum(errorForward);
         %% Backward Transformation Error
-        im2ptsBackward = transformBackward(img2_points,A);
-        errorBackward = sum((im2ptsBackward-img1_points).^2,2).^0.5;
-        totalBackwardError = sum(errorBackward);
+        
+         iA=inv(A);
+         im2ptsBackward = [(iA(1,1:2)*img2_points'+iA(1,3))./(iA(3,1:2)*img2_points'+iA(3,3));...
+         (iA(2,1:2)*img2_points'+iA(2,3))./(iA(3,1:2)*img2_points'+iA(3,3))]';
+        
+          errorBackward = sum((im2ptsBackward-img1_points).^2,2).^0.5;
+          totalBackwardError = sum(errorBackward);
         %% Total Geometric Error
         totalError = totalForwardError + totalBackwardError;
         %% Expected Error Distribution Std Dev
